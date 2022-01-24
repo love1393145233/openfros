@@ -99,6 +99,7 @@ start_instance()
 	local realm="$(uci_get system.@system[0].hostname)"
 	local listen http https interpreter indexes path handler httpdconf haveauth
 	local enabled
+	local fros
 
 	config_get_bool enabled "$cfg" 'enabled' 1
 	[ $enabled -gt 0 ] || return
@@ -169,10 +170,18 @@ start_instance()
 		procd_append_param command -i "$path"
 	done
 
-	config_get indexes "$cfg" index_page
-	for path in $indexes; do
-		procd_append_param command -I "$path"
-	done
+	#config_get indexes "$cfg" index_page
+	#for path in $indexes; do
+	#	procd_append_param command -I "$path"
+	#done
+
+        config_get fros "$cfg" fros_ui
+        if [ x"$fros" == x"1" -a -f "/www/index2.html" ];then
+	   cp /www/index.html /www/index_luci.html
+           cp /www/index2.html /www/index.html
+	else
+	   cp /www/index_luci.html /www/index.html
+        fi
 
 	config_get https "$cfg" listen_https
 	config_get UHTTPD_KEY  "$cfg" key  /etc/uhttpd.key

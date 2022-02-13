@@ -12,3 +12,8 @@
 		echo "CONFIG_PACKAGE_fros_files=y" >>.config
 		echo "CONFIG_PACKAGE_rule_apply=y" >>.config
 
+		echo "CONFIG_PACKAGE_luci-app-portal=y" >>.config
+		echo "CONFIG_PACKAGE_luci-i18n-portal-zh-cn=y" >>.config
+		echo "CONFIG_PACKAGE_kmod-portal=y" >>.config
+		echo "CONFIG_PACKAGE_luci-app-app_delay=y" >>.config
+		echo "CONFIG_PACKAGE_portald=y" >>.config

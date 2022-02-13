@@ -8,12 +8,16 @@ LANG:=C
 TZ:=UTC
 export TOPDIR LC_ALL LANG TZ
 
+
+ifdef product
+	FROS_PRODUCT:=$(product)
+endif
+
 empty:=
 space:= $(empty) $(empty)
 $(if $(findstring $(space),$(TOPDIR)),$(error ERROR: The path to the OpenWrt directory must not include any spaces))
 
 world:
-
 DISTRO_PKG_CONFIG:=$(shell which -a pkg-config | grep -E '\/usr' | head -n 1)
 export PATH:=$(TOPDIR)/staging_dir/host/bin:$(PATH)
 
@@ -49,6 +53,16 @@ printdb:
 	@true
 
 prepare: $(target/stamp-compile)
+
+init_product:
+	echo "init product $(FROS_PRODUCT)" 
+	if [ ! -z "$(FROS_PRODUCT)" ]; then \
+                if [ -e $(TOPDIR)/product/$(FROS_PRODUCT)/product_config ]; then \
+                        cp $(TOPDIR)/product/$(FROS_PRODUCT)/product_config .config; \
+			cp $(TOPDIR)/product/$(FROS_PRODUCT)/product_feature $(TOPDIR)/package/fros/fros_files/files/etc; \
+                fi \
+        fi
+
 
 clean: FORCE
 	rm -rf $(BUILD_DIR) $(STAGING_DIR) $(BIN_DIR) $(OUTPUT_DIR)/packages/$(ARCH_PACKAGES) $(BUILD_LOG_DIR) $(TOPDIR)/staging_dir/packages
@@ -116,7 +130,7 @@ buildinfo: FORCE
 prepare: .config $(tools/stamp-compile) $(toolchain/stamp-compile)
 	$(_SINGLE)$(SUBMAKE) -r buildinfo
 
-world: prepare $(target/stamp-compile) $(package/stamp-compile) $(package/stamp-install) $(target/stamp-install) FORCE
+world: init_product prepare $(target/stamp-compile) $(package/stamp-compile) $(package/stamp-install) $(target/stamp-install) FORCE
 	$(_SINGLE)$(SUBMAKE) -r package/index
 	$(_SINGLE)$(SUBMAKE) -r json_overview_image_info
 	$(_SINGLE)$(SUBMAKE) -r checksum

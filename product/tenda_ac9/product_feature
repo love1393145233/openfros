@@ -1,0 +1,5 @@
+{
+	"chip": "bcm",
+	"radio_num": 2,
+	"wifi_driver_type": 0
+}

@@ -1,7 +1,7 @@
-src-git packages https://github.com/destan19/packages
-src-git luci https://github.com/destan19/luci
-src-git routing https://git.openwrt.org/feed/routing.git
-src-git telephony https://git.openwrt.org/feed/telephony.git
+src-git packages https://github.com/coolsnowwolf/packages^f68f1793114aeb61e3bbcd0b6cf5999974e117a9
+src-git luci https://github.com/coolsnowwolf/luci^5f363d93c5f6ec011ac3d63b6e15be23e27ecdb7
+src-git routing https://git.openwrt.org/feed/routing.git^d7adf188eb410fdd4df28be71c7c9c2cb5e36e3a
+src-git telephony https://git.openwrt.org/feed/telephony.git^0eb623a3a66b408b974b316332904d045ccbca01
 #src-git video https://github.com/openwrt/video.git
 #src-git targets https://github.com/openwrt/targets.git
 #src-git oldpackages http://git.openwrt.org/packages.git

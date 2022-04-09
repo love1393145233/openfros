@@ -1,0 +1,5 @@
+{
+	"chip": "mt7620",
+	"radio_num": 2,
+	"wifi_driver_type": 0
+}

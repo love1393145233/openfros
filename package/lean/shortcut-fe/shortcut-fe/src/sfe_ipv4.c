@@ -25,6 +25,11 @@
 
 #include "sfe.h"
 #include "sfe_cm.h"
+#include <linux/netfilter.h>
+#include <net/netfilter/nf_conntrack.h>
+#include <net/netfilter/nf_conntrack_acct.h>
+
+#define MAX_ACCEPT_PKTS_NUM 16
 
 /*
  * By default Linux IP header and transport layer header structures are
@@ -261,6 +266,7 @@ struct sfe_ipv4_connection_match {
 	 */
 	u64 rx_packet_count64;
 	u64 rx_byte_count64;
+	int last_len;
 };
 
 /*
@@ -1240,6 +1246,23 @@ static int sfe_ipv4_recv_udp(struct sfe_ipv4 *si, struct sk_buff *skb, struct ne
 		return 0;
 	}
 
+
+
+	if (cm->rx_packet_count64 < MAX_ACCEPT_PKTS_NUM){
+		DEBUG_INFO("---------%s %d UDP %pI4(%d)---->%pI4(%d) skb->len = %d, rx_count=%llu\n", __func__, __LINE__, 
+			&src_ip, ntohs(src_port), &dest_ip, ntohs(dest_port),
+			skb->len, cm->rx_packet_count64);
+
+		si->packets_not_forwarded++;
+		if (skb->len <= 32 || cm->last_len != skb->len){
+			cm->rx_packet_count64++;
+		}
+
+		cm->last_len = skb->len;
+		spin_unlock_bh(&si->lock);
+		return 0;
+	}
+
 	/*
 	 * If our packet has beern marked as "flush on find" we can't actually
 	 * forward it in the fast path, but now that we've found an associated
@@ -1643,6 +1666,23 @@ static int sfe_ipv4_recv_tcp(struct sfe_ipv4 *si, struct sk_buff *skb, struct ne
 			    flags & (TCP_FLAG_SYN | TCP_FLAG_RST | TCP_FLAG_FIN | TCP_FLAG_ACK));
 		return 0;
 	}
+
+	
+
+	if (cm->rx_packet_count64 < MAX_ACCEPT_PKTS_NUM){
+		DEBUG_TRACE("---------%s %d TCP %pI4(%d)---->%pI4(%d) skb->len = %d, rx_count=%llu\n", __func__, __LINE__, 
+			&src_ip, ntohs(src_port), &dest_ip, ntohs(dest_port),
+			skb->len, cm->rx_packet_count64);
+		si->packets_not_forwarded++;
+		if (skb->len <= 64 || cm->last_len != skb->len){
+			cm->rx_packet_count64++;
+		}
+
+		cm->last_len = skb->len;
+		spin_unlock_bh(&si->lock);
+		return 0;
+	}
+
 
 	/*
 	 * If our packet has beern marked as "flush on find" we can't actually
@@ -3502,7 +3542,6 @@ static int __init sfe_ipv4_init(void)
 {
 	struct sfe_ipv4 *si = &__si;
 	int result = -1;
-
 	DEBUG_INFO("SFE IPv4 init\n");
 
 	/*

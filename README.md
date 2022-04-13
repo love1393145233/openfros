@@ -5,4 +5,4 @@
 lean大仓库地址：
 https://github.com/coolsnowwolf/lede
 
-插件安装请切换到fros-1.x分支编译
+目前没有提供最新fros插件，请先不要自己编译，后续会基于该源码发布ipk插件
